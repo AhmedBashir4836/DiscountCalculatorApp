@@ -1,90 +1,104 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View,TouchableOpacity,ScrollView, TextInput, Modal, Button, FlatList } from 'react-native';
 
 export default function App() {
+  const [getOriginalPrice, setOriginalPrice] = useState("");
+  const [getDiscountPercentage,setDiscountPercentage] = useState("");
+  const [getSaving, setSaving] = useState("0.0");
+  const [getFprice,setFprice] = useState("0.0");
+  const [getHistory, setHistory] = useState([""]);
+  const [getModalVisible, setModalVisible] = useState(false);
+  
+  const saveDiscount = () =>{
+    var ogPrice = getOriginalPrice;
+    var dPercentage = getDiscountPercentage;
+    var fPrice = getFprice;
+    var detail = ogPrice +"|------|"+dPercentage+"|------|"+fPrice;
+    setHistory([...getHistory, detail]);
+    setOriginalPrice("");
+    setDiscountPercentage("");
+   } 
+
+  
+  const countDiscountPrice = () =>{
+      if(getDiscountPercentage == 100){
+        alert("Discount Percentage cannot be greater or equal than Original Price");
+      }
+      else if(isNaN(getOriginalPrice) || isNaN(getDiscountPercentage)){
+        alert("Please Enter Valid Input");
+      }
+      else if (getDiscountPercentage <= 0){
+        alert("Discount Percentage cannot be Zero");
+      }
+      else if(getOriginalPrice <= 0){
+        alert("Original Price cannot be zero or negative");
+      }
+      else{
+        var saving = (getOriginalPrice * getDiscountPercentage)/100;
+        setSaving(saving);
+        var total = getOriginalPrice - saving;
+        setFprice(total);
+      }
+  }
+
+  
   return (
-    <View style={styles.container}>
-      <Text>Discount Calculator</Text>
+    <View style={styles.container}> 
+      
+      <Text style={{fontSize:30,fontWeight:'bold',color:'tomato'}}>Discount Calculator</Text>
+      
       <View style={styles.inputContainer}>
-        <TextInput style={styles.inputtext} placeholder="Original Price"/>
+        <TextInput style={styles.inputtext} value = {getOriginalPrice} onChangeText={(originalPrice) =>  setOriginalPrice(originalPrice)} placeholder="Original Price"/>
+        <Text></Text>
       </View>
+      
       <View style={styles.inputContainer}>
-        <TextInput style={styles.inputtext} placeholder="Discount Percentage"/>
+        <TextInput style={styles.inputtext} value = {getDiscountPercentage} onChangeText={(discountPercentage) =>  setDiscountPercentage(discountPercentage)} placeholder="Discount Percentage"/>
+      </View>
+
+      <View>
+        <TouchableOpacity onPress={countDiscountPrice}>
+          <Text style={{fontSize:30, alignItems:"center", justifyContent:"center",fontWeight:'bold',backgroundColor:"white",borderRadius:10,borderColor:'seagreen',color:"seagreen" ,borderWidth:2,width:"100%"}}>Calculate</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View>
+        <Text style={{fontSize:20,fontWeight:'bold',padding:5}}>You Save $: {getSaving}</Text>
+        <Text style={{fontSize:20,fontWeight:'bold',padding:5}}>Final Price $: {getFprice}</Text>
+      </View>
+
+      <View>
+        <TouchableOpacity onPress={saveDiscount}> 
+          <Text style={{fontSize:20,fontWeight:'bold',color:"white",backgroundColor:"green",borderRadius:50,padding:5, width:"100%",borderWidth:2,alignItems:"center",justifyContent:"center",borderColor:'black',padding:10}}>Save</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.container}>
-      <View style={{flexDirection:'row'}}>
-        
-        <TouchableOpacity style={styles.box}>
-          <Text>1</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>2</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>3</Text>
-        </TouchableOpacity>
+        <Text style={{fontSize:40,color:"tomato",fontWeight:'bold', alignItems:"center", justifyContent:"center"}}>History</Text>
+        <Text style={{fontSize:12,fontWeight:'bold',color:'orange'}}>Original Price in $|---| Discount Price in $|---| Final Price in $</Text>
       </View>
+
+     
+    
+      <ScrollView>
+
+        <FlatList
+          data={getHistory}  renderItem={({ item }) => { return <Text>{item}</Text> }} 
+          keyExtractor={(index) => { return index }} />
       
-      <View style={{flexDirection:'row'}}>
-        <TouchableOpacity style={styles.box}>
-          <Text>4</Text>
-        </TouchableOpacity>
+      </ScrollView>
 
-        <TouchableOpacity style={styles.box}>
-          <Text>5</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>6</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{flexDirection:'row'}}>
-        <TouchableOpacity style={styles.box}>
-          <Text>7</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>8</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>9</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{flexDirection:'row'}}>
-        <TouchableOpacity style={styles.box}>
-          <Text>C</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>0</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <Text>.</Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <TouchableOpacity>
-          <Text style={{borderWidth:3,borderColor:'orange', borderRadius:50,fontSize:20,width:"100%"}}>Calculate</Text>
-        </TouchableOpacity>
-     </View>
-     </View>
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
-    paddingTop:80,
+    paddingTop:50,
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'aqua',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -101,14 +115,5 @@ const styles = StyleSheet.create({
     justifyContent:'space-between',
     alignItems:"center",
     padding:5,
-  },
-  box:{
-    paddingLeft:40,
-    alignSelf:"center",
-    borderWidth:1,
-    width:100,
-    height:100,
-    borderColor:'white',
-    marginLeft:10,
   }
 });
